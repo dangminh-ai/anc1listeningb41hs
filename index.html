@@ -210,6 +210,17 @@ button,input{font-family:inherit}
 .hist .empty{color:var(--muted);font-style:italic}
 .foot{text-align:center;color:var(--muted);margin-top:26px;font-size:15px}
 
+.overlay{display:none;position:fixed;inset:0;z-index:80;align-items:center;justify-content:center;padding:16px;background:rgba(5,2,12,.78);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.modal{max-width:440px;width:100%;background:#1a0d2b;border:1px solid var(--orange);border-radius:16px;padding:20px;box-shadow:0 0 36px -8px rgba(255,138,31,.7)}
+.modal h3{margin:0 0 8px;font-family:'Creepster','Lora',serif;font-weight:400;font-size:26px;letter-spacing:1px;color:var(--orange)}
+.modal p{margin:0 0 8px}
+.unlist{max-height:30vh;overflow:auto;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.06);color:var(--orange-soft);margin-bottom:14px;line-height:1.6}
+.modal-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.pend{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-color:var(--no)}
+.pend[hidden]{display:none}
+.pend span{flex:1 1 220px}
+.hist .st-ok{color:var(--ok)}
+.hist .st-no{color:var(--no)}
 @media (max-width:620px){
   .hero{padding-top:44px}
   .moon{width:60px;height:60px;right:4%;top:14px}
@@ -301,6 +312,12 @@ button,input{font-family:inherit}
     <div class="err" id="nameErr">Nhớ ghi họ tên trước khi nghe và nộp bài nhé.</div>
   </section>
 
+  <section class="box pend" id="pendBox" hidden>
+    <span id="pendTxt"></span>
+    <button type="button" class="btn" id="pendBtn">Gửi lại ngay</button>
+    <button type="button" class="btn" id="pendDl">Tải bài làm</button>
+  </section>
+
   <section class="player" id="player" aria-label="Trình phát bài nghe">
     <button type="button" class="play-btn" id="playBtn"><span id="playIco">▶</span><span id="playLbl">Bắt đầu nghe</span></button>
     <div class="player-mid">
@@ -323,6 +340,7 @@ button,input{font-family:inherit}
     <div class="res-actions">
       <button type="button" class="btn" id="jumpBtn">Đến câu sai đầu tiên</button>
       <button type="button" class="btn" id="resendBtn" hidden>Gửi lại bài</button>
+      <button type="button" class="btn" id="dlBtn">Tải bài làm về máy</button>
       <button type="button" class="btn" id="retryBtn">Làm lại từ đầu</button>
     </div>
   </section>
@@ -335,13 +353,26 @@ button,input{font-family:inherit}
   <div class="foot">Chúc các em làm bài thật tốt.</div>
 </main>
 
+<div class="overlay" id="confirmOverlay" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+  <div class="modal">
+    <h3 id="confirmTitle">Còn câu chưa trả lời</h3>
+    <p>Em còn <b id="unCount">0</b> câu chưa làm:</p>
+    <div class="unlist" id="unList"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn" id="backBtn">Quay lại làm bài</button>
+      <button type="button" class="btn main" id="goBtn" style="font-size:16px;padding:12px 26px">Vẫn nộp bài</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
 "use strict";
 
 /* ===================== CẤU HÌNH ===================== */
 var VIDEO_ID = "UyOqOa440l4";
-var TEACHER_EMAIL = "ddangminh1905@gmail.com";   // đổi thành Gmail nhận bài
+var TEACHER_EMAIL = "ddangminh1905@gmail.com";   // Gmail nhận bài
+var WEB3FORMS_KEY = "";   // (tuỳ chọn) access key Web3Forms của Gmail nhận bài; để trống thì chỉ dùng FormSubmit
 var MAX_LISTENS = 2;
 var STORE_PREFIX = "halloweenListening_v1_";
 var LETTERS = ["A","B","C","D"];
@@ -432,6 +463,67 @@ function saveState(name, st){
   try{ localStorage.setItem(k, JSON.stringify(st)); }catch(e){}
 }
 
+/* ===================== TỰ ĐỘNG LƯU BÀI ĐANG LÀM (CỤC BỘ) ===================== */
+var DRAFT_PREFIX = STORE_PREFIX + "draft_";
+var LAST_NAME_KEY = STORE_PREFIX + "__lastName";
+var memDraft = {};
+function draftKey(name){ return DRAFT_PREFIX + (name ? name.normalize("NFC").toLowerCase() : "__anon"); }
+function collectAnswers(){
+  var o = {};
+  QUESTIONS.forEach(function(q){ var a = readAnswer(q); if(a !== null && a !== "") o[q.n] = a; });
+  return o;
+}
+function hasAnyAnswer(){ return Object.keys(collectAnswers()).length > 0; }
+function saveDraft(){
+  var name = getName();
+  var k = draftKey(name);
+  var d = {answers: collectAnswers(), t: Date.now()};
+  memDraft[k] = d;
+  try{
+    localStorage.setItem(k, JSON.stringify(d));
+    localStorage.setItem(LAST_NAME_KEY, name);
+  }catch(e){}
+}
+function loadDraft(name){
+  var k = draftKey(name), d = null;
+  try{
+    var raw = localStorage.getItem(k);
+    if(raw) d = JSON.parse(raw);
+  }catch(e){}
+  if(!d) d = memDraft[k];
+  if(d && d.answers && Object.keys(d.answers).length) return d.answers;
+  return null;
+}
+function clearDraft(){
+  [getName(), ""].forEach(function(n){
+    var k = draftKey(n);
+    delete memDraft[k];
+    try{ localStorage.removeItem(k); }catch(e){}
+  });
+}
+function applyAnswers(ans){
+  QUESTIONS.forEach(function(q){
+    var card = $("q" + q.n), v = ans[q.n];
+    if(!card) return;
+    if(q.type === "gap"){
+      card.querySelector(".gap").value = (v === undefined ? "" : v);
+    } else {
+      card.querySelectorAll("input[type=radio]").forEach(function(i){
+        i.checked = (v !== undefined && String(v) === i.value);
+      });
+      card.querySelectorAll(".opt").forEach(function(o){
+        o.classList.toggle("picked", o.querySelector("input").checked);
+      });
+    }
+  });
+  updateAnswered();
+}
+var saveTimer = null;
+function scheduleSave(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveDraft, 300);
+}
+
 /* ===================== DỰNG CÂU HỎI ===================== */
 var quizEl = $("quiz");
 function buildQuiz(){
@@ -481,6 +573,7 @@ function onAnswerChange(e){
     });
   }
   updateAnswered();
+  scheduleSave();
 }
 quizEl.addEventListener("input", onAnswerChange);
 quizEl.addEventListener("change", onAnswerChange);
@@ -546,9 +639,10 @@ function renderHistory(){
     body.innerHTML = '<div class="empty">Chưa có lần nộp nào.</div>';
     return;
   }
-  var h = '<table><tr><th>Lần</th><th>Số câu đúng</th><th>Thời gian nộp</th></tr>';
+  var h = '<table><tr><th>Lần</th><th>Số câu đúng</th><th>Thời gian nộp</th><th>Gửi GV</th></tr>';
   st.attempts.forEach(function(a){
-    h += '<tr><td>Lần ' + a.n + '</td><td>' + a.score + ' / ' + a.total + '</td><td>' + a.time + '</td></tr>';
+    h += '<tr><td>Lần ' + a.n + '</td><td>' + a.score + ' / ' + a.total + '</td><td>' + a.time + '</td><td class="' +
+      (a.sent ? 'st-ok">Đã gửi' : 'st-no">Chưa gửi') + '</td></tr>';
   });
   body.innerHTML = h + '</table>';
 }
@@ -556,8 +650,13 @@ var nameTimer = null;
 $("studentName").addEventListener("input", function(){
   $("nameBox").classList.remove("bad");
   clearTimeout(nameTimer);
-  nameTimer = setTimeout(function(){ renderHistory(); refreshPlayerUI(); }, 250);
+  nameTimer = setTimeout(function(){
+    renderHistory();
+    refreshPlayerUI();
+    if(!hasAnyAnswer()){ var d = loadDraft(getName()); if(d) applyAnswers(d); }
+  }, 300);
 });
+$("studentName").addEventListener("change", function(){ saveDraft(); });
 
 /* ===================== TRÌNH PHÁT (YOUTUBE, CHỈ NGHE) ===================== */
 var yt = null, ytReady = false, ytFailed = false;
@@ -716,39 +815,160 @@ $("playBtn").addEventListener("click", onPlayClick);
 setInterval(function(){ if(session.active) refreshPlayerUI(); }, 500);
 
 /* ===================== NỘP BÀI VÀ GỬI CHO GIÁO VIÊN ===================== */
-var lastPayload = null, sending = false;
+var lastItem = null, sending = false, flushing = false;
+var PENDING_KEY = STORE_PREFIX + "__pending";
+var memPending = [];
 
-function sendPayload(payload){
-  return fetch("https://formsubmit.co/ajax/" + TEACHER_EMAIL, {
+function loadPending(){
+  try{
+    var raw = localStorage.getItem(PENDING_KEY);
+    var l = raw ? JSON.parse(raw) : [];
+    if(Array.isArray(l)){ memPending = l; return l; }
+  }catch(e){}
+  return memPending;
+}
+function savePending(list){
+  memPending = list;
+  try{ localStorage.setItem(PENDING_KEY, JSON.stringify(list)); }catch(e){}
+}
+function sameItem(x, y){ return x.name === y.name && x.attemptNo === y.attemptNo; }
+function addPending(item){
+  var l = loadPending().filter(function(x){ return !sameItem(x, item); });
+  l.push(item);
+  savePending(l);
+}
+function removePending(item){
+  savePending(loadPending().filter(function(x){ return !sameItem(x, item); }));
+}
+function markSent(name, attemptNo){
+  var st = loadState(name);
+  st.attempts.forEach(function(a){ if(a.n === attemptNo) a.sent = true; });
+  saveState(name, st);
+}
+function payloadText(p){
+  var lines = [];
+  if(p._subject) lines.push(p._subject);
+  lines.push("");
+  Object.keys(p).forEach(function(k){
+    if(k.charAt(0) === "_") return;
+    lines.push(k.replace(/_/g, " ") + ": " + p[k]);
+  });
+  return lines.join("\n");
+}
+
+/* ---- gửi qua mạng: thử lần lượt từng đường, có timeout ---- */
+function postJson(url, body){
+  var ctrl = (typeof AbortController !== "undefined") ? new AbortController() : null;
+  var timer = ctrl ? setTimeout(function(){ ctrl.abort(); }, 20000) : null;
+  return fetch(url, {
     method:"POST",
     headers:{"Content-Type":"application/json", "Accept":"application/json"},
-    body:JSON.stringify(payload)
+    body:JSON.stringify(body),
+    signal: ctrl ? ctrl.signal : undefined
   }).then(function(res){
-    if(!res.ok) throw new Error("http " + res.status);
-    return res.json().catch(function(){ return {}; });
-  }).then(function(data){
-    if(data && (data.success === false || data.success === "false")) throw new Error(data.message || "fail");
-    return true;
+    if(timer) clearTimeout(timer);
+    return res.json().catch(function(){ return {}; }).then(function(data){ return {ok:res.ok, data:data || {}}; });
+  }, function(err){
+    if(timer) clearTimeout(timer);
+    throw err;
   });
 }
-function doSend(attemptNo){
+function viaWeb3Forms(p){
+  return postJson("https://api.web3forms.com/submit", {
+    access_key: WEB3FORMS_KEY,
+    subject: p._subject,
+    from_name: p.Ho_ten,
+    name: p.Ho_ten,
+    score: p.Diem,
+    answers: payloadText(p)
+  }).then(function(r){
+    if(!(r.ok && r.data.success === true)) throw new Error("web3forms");
+  });
+}
+function viaFormSubmit(p){
+  return postJson("https://formsubmit.co/ajax/" + TEACHER_EMAIL, p).then(function(r){
+    var s = r.data.success;
+    if(!r.ok || s === false || s === "false") throw new Error(r.data.message || "formsubmit");
+  });
+}
+function trySend(p){
+  var routes = [];
+  if(WEB3FORMS_KEY) routes.push(viaWeb3Forms);
+  routes.push(viaFormSubmit);
+  var i = 0;
+  function next(err){
+    if(i >= routes.length) return Promise.reject(err || new Error("send failed"));
+    return routes[i++](p).catch(next);
+  }
+  return next();
+}
+
+function updatePendBox(msg){
+  var n = loadPending().length;
+  var box = $("pendBox");
+  if(sending || n === 0){ box.hidden = true; return; }
+  box.hidden = false;
+  $("pendTxt").textContent = msg || ("Còn " + n + " bài chưa gửi được cho giáo viên (đã lưu trên máy, không bị mất).");
+  $("pendBtn").disabled = !!msg;
+}
+function flushPending(){
+  if(flushing || sending) return;
+  var list = loadPending().slice();
+  if(!list.length){ updatePendBox(); return; }
+  flushing = true;
+  updatePendBox("Đang gửi lại bài chưa gửi được...");
+  var chain = Promise.resolve();
+  list.forEach(function(it){
+    chain = chain.then(function(){
+      return trySend(it.payload).then(function(){
+        removePending(it);
+        markSent(it.name, it.attemptNo);
+      }).catch(function(){});
+    });
+  });
+  chain.then(function(){
+    flushing = false;
+    renderHistory();
+    updatePendBox();
+  });
+}
+function doSend(item){
   var status = $("sendStatus");
   sending = true;
+  lastItem = item;
   $("submitBtn").disabled = true;
   $("resendBtn").hidden = true;
+  updatePendBox();
   status.className = "res-send";
   status.innerHTML = '<span class="dots">Đang gửi bài cho giáo viên</span>';
-  sendPayload(lastPayload).then(function(){
+  return trySend(item.payload).then(function(){
+    removePending(item);
+    markSent(item.name, item.attemptNo);
     status.className = "res-send okk";
-    status.textContent = "Bài làm lần " + attemptNo + " đã được gửi cho giáo viên.";
+    status.textContent = "Bài làm lần " + item.attemptNo + " đã được gửi cho giáo viên.";
   }).catch(function(){
     status.className = "res-send fail";
-    status.textContent = "Chưa gửi được bài. Kiểm tra mạng rồi bấm Gửi lại bài.";
+    status.textContent = "Chưa gửi được bài, nhưng bài làm đã được lưu trên máy. Kiểm tra mạng rồi bấm Gửi lại bài, hoặc bấm Tải bài làm về máy để gửi file cho giáo viên.";
     $("resendBtn").hidden = false;
   }).then(function(){
     sending = false;
     $("submitBtn").disabled = false;
+    renderHistory();
+    updatePendBox();
   });
+}
+function downloadBackup(){
+  var it = lastItem || loadPending()[0];
+  if(!it){ window.alert("Chưa có bài nào để tải."); return; }
+  var nm = (it.name || "hoc-sinh").replace(/[^\w\-]+/g, "_");
+  var blob = new Blob([payloadText(it.payload)], {type:"text/plain;charset=utf-8"});
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "halloween-listening-" + nm + "-lan" + it.attemptNo + ".txt";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
 }
 function messageFor(score){
   if(score === TOTAL) return "Trọn điểm rồi, rất xuất sắc.";
@@ -782,21 +1002,23 @@ function submitQuiz(){
   if(!name){ flagName(); return; }
   var st = loadState(name);
   var attemptNo = st.attempts.length + 1;
-  var score = 0, rows = {}, firstWrong = null;
+  var score = 0, rows = {}, blank = 0;
 
   QUESTIONS.forEach(function(q){
     var a = readAnswer(q);
     var answered = !(a === null || a === "");
     var ok = isCorrect(q, a);
     if(ok) score++;
+    if(!answered) blank++;
     mark(q, ok, answered);
     var key = "Cau_" + (q.n < 10 ? "0" : "") + q.n;
     rows[key] = showAnswer(q, a) + "  =>  " + (ok ? "Đúng" : "Sai");
   });
 
   var when = new Date().toLocaleString("vi-VN");
-  st.attempts.push({n:attemptNo, score:score, total:TOTAL, time:when});
+  st.attempts.push({n:attemptNo, score:score, total:TOTAL, time:when, sent:false});
   saveState(name, st);
+  saveDraft();
   renderHistory();
 
   $("resLabel").textContent = "Lần làm thứ " + attemptNo;
@@ -812,20 +1034,41 @@ function submitQuiz(){
     Ho_ten: name,
     Lan_lam: attemptNo,
     Diem: score + " / " + TOTAL,
+    So_cau_bo_trong: blank,
     Luot_nghe_da_dung: Math.min(st.listens, MAX_LISTENS) + " / " + MAX_LISTENS,
     Thoi_gian_nop: when
   };
   Object.keys(rows).forEach(function(k){ payload[k] = rows[k]; });
-  lastPayload = payload;
+
+  var item = {name:name, attemptNo:attemptNo, payload:payload};
+  addPending(item);   // lưu trước khi gửi: lỡ tắt trang hoặc mất mạng vẫn tự gửi lại lần sau
 
   $("result").scrollIntoView({behavior: reduceMotion ? "auto" : "smooth", block:"center"});
   if(score >= 24) celebrate(score);
-  doSend(attemptNo);
+  doSend(item);
 }
-$("submitBtn").addEventListener("click", submitQuiz);
-$("resendBtn").addEventListener("click", function(){
-  if(lastPayload && !sending) doSend(lastPayload.Lan_lam);
-});
+function onSubmitClick(){
+  if(sending) return;
+  var name = getName();
+  if(!name){ flagName(); return; }
+  var un = QUESTIONS.filter(function(q){ var a = readAnswer(q); return a === null || a === ""; })
+    .map(function(q){ return q.n; });
+  if(un.length){
+    $("unCount").textContent = un.length;
+    $("unList").textContent = "Câu " + un.join(", ");
+    $("confirmOverlay").style.display = "flex";
+  } else {
+    submitQuiz();
+  }
+}
+$("submitBtn").addEventListener("click", onSubmitClick);
+$("backBtn").addEventListener("click", function(){ $("confirmOverlay").style.display = "none"; });
+$("goBtn").addEventListener("click", function(){ $("confirmOverlay").style.display = "none"; submitQuiz(); });
+$("resendBtn").addEventListener("click", function(){ if(lastItem && !sending) doSend(lastItem); });
+$("dlBtn").addEventListener("click", downloadBackup);
+$("pendDl").addEventListener("click", downloadBackup);
+$("pendBtn").addEventListener("click", flushPending);
+window.addEventListener("online", flushPending);
 $("jumpBtn").addEventListener("click", function(){
   var w = document.querySelector(".q.no");
   if(w) w.scrollIntoView({behavior: reduceMotion ? "auto" : "smooth", block:"center"});
@@ -841,6 +1084,7 @@ $("retryBtn").addEventListener("click", function(){
     card.querySelectorAll(".opt").forEach(function(o){ o.classList.remove("picked"); });
   });
   $("result").classList.remove("show");
+  clearDraft();
   updateAnswered();
   window.scrollTo({top: 0, behavior: reduceMotion ? "auto" : "smooth"});
 });
@@ -921,6 +1165,17 @@ if(!reduceMotion){
 }
 
 /* ===================== KHỞI TẠO ===================== */
+(function restoreOnLoad(){
+  var ln = "";
+  try{ ln = localStorage.getItem(LAST_NAME_KEY) || ""; }catch(e){}
+  if(ln) $("studentName").value = ln;
+  var d = loadDraft(ln);
+  if(d) applyAnswers(d);
+})();
+document.addEventListener("visibilitychange", function(){ if(document.hidden) saveDraft(); });
+window.addEventListener("pagehide", saveDraft);
+updatePendBox();
+setTimeout(flushPending, 1500);
 renderHistory();
 refreshPlayerUI();
 updateAnswered();
