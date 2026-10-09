@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0a0612">
+<title>Halloween Listening Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Creepster&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0612;
+  --card:rgba(25,14,41,.88);
+  --line:rgba(255,140,40,.28);
+  --orange:#ff8a1f;
+  --orange-soft:#ffb347;
+  --bone:#f3e9d8;
+  --muted:#bba9cf;
+  --ok:#7ee08a;
+  --ok-bg:rgba(70,170,90,.18);
+  --no:#ff7070;
+  --no-bg:rgba(230,70,70,.18);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;min-height:100vh;color:var(--bone);
+  font-family:'Lora',Georgia,'Times New Roman',serif;font-size:16px;line-height:1.7;
+  background:
+    radial-gradient(1100px 700px at 88% -8%,#3b1d60 0%,transparent 60%),
+    radial-gradient(900px 600px at 0% 100%,#2a0f3a 0%,transparent 55%),
+    linear-gradient(180deg,#0a0612,#150a24 60%,#0a0612);
+  background-attachment:fixed;overflow-x:hidden;
+}
+::selection{background:rgba(255,138,31,.45)}
+button,input{font-family:inherit}
+
+#embers{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.fog{position:fixed;left:-50%;width:200%;bottom:0;height:38vh;pointer-events:none;z-index:1;
+  background:
+    radial-gradient(ellipse at 20% 80%,rgba(190,160,230,.10),transparent 55%),
+    radial-gradient(ellipse at 60% 92%,rgba(190,160,230,.09),transparent 50%),
+    radial-gradient(ellipse at 90% 70%,rgba(190,160,230,.08),transparent 55%);
+  animation:fogMove 40s linear infinite alternate}
+.fog.f2{height:26vh;opacity:.7;animation-duration:58s;animation-direction:alternate-reverse}
+@keyframes fogMove{from{transform:translateX(0)}to{transform:translateX(25%)}}
+.grave{position:fixed;left:0;bottom:0;width:100%;height:110px;z-index:0;pointer-events:none;opacity:.9}
+.flash{position:fixed;inset:0;background:#cdb8ff;opacity:0;pointer-events:none;z-index:55}
+.flash.go{animation:flash .9s ease-out}
+@keyframes flash{0%{opacity:0}8%{opacity:.11}16%{opacity:.02}28%{opacity:.09}100%{opacity:0}}
+
+.bat{position:fixed;left:-90px;z-index:3;pointer-events:none;animation:batFly linear forwards}
+.bat.rtl{left:auto;right:-90px;animation-name:batFlyL}
+.bat-in svg{display:block;width:100%;height:auto;fill:#08030f;stroke:rgba(190,140,255,.7);stroke-width:1;
+  filter:drop-shadow(0 0 4px rgba(190,140,255,.55));animation:flap .22s ease-in-out infinite alternate}
+.bat.rtl .bat-in{transform:scaleX(-1)}
+@keyframes batFly{to{transform:translateX(calc(100vw + 200px))}}
+@keyframes batFlyL{to{transform:translateX(calc(-100vw - 200px))}}
+@keyframes flap{from{transform:scaleY(1) translateY(0)}to{transform:scaleY(.5) translateY(6px)}}
+
+.eyes{position:fixed;z-index:1;display:flex;gap:14px;pointer-events:none;opacity:0;animation:eyesLife 3.2s ease-in-out forwards}
+.eyes i{display:block;width:17px;height:9px;border-radius:50%;
+  background:radial-gradient(#fff6b0,#ffb300 60%,#c25a00);box-shadow:0 0 12px 3px rgba(255,170,0,.7)}
+@keyframes eyesLife{
+  0%{opacity:0}15%{opacity:1;transform:scaleY(1)}30%{transform:scaleY(.1)}36%{transform:scaleY(1)}
+  60%{transform:scaleY(1)}66%{transform:scaleY(.1)}72%{transform:scaleY(1)}100%{opacity:0}}
+
+.fall{position:fixed;top:-50px;z-index:60;pointer-events:none;font-size:26px;animation:fall linear forwards}
+@keyframes fall{to{transform:translate(var(--dx),115vh) rotate(var(--rot))}}
+
+.hero{position:relative;z-index:2;text-align:center;padding:50px 18px 26px;overflow:hidden}
+.moon{position:absolute;top:18px;right:6%;width:92px;height:92px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#fff7d6,#f3dc8a 55%,#d9b95a);
+  box-shadow:0 0 40px 12px rgba(255,230,140,.32),0 0 120px 40px rgba(255,200,90,.14);
+  animation:moonPulse 7s ease-in-out infinite}
+.moon::before,.moon::after{content:"";position:absolute;border-radius:50%;background:rgba(160,120,40,.25)}
+.moon::before{width:20px;height:20px;top:22px;left:50px}
+.moon::after{width:13px;height:13px;top:54px;left:24px}
+@keyframes moonPulse{0%,100%{box-shadow:0 0 40px 12px rgba(255,230,140,.32),0 0 120px 40px rgba(255,200,90,.14)}50%{box-shadow:0 0 52px 16px rgba(255,230,140,.42),0 0 140px 50px rgba(255,200,90,.2)}}
+.spider{position:absolute;top:0;left:9%;display:flex;flex-direction:column;align-items:center;transform-origin:top center;animation:swing 4.5s ease-in-out infinite}
+.spider .thread{width:1px;background:rgba(220,200,255,.55);height:60px;animation:drop 9s ease-in-out infinite}
+.spider svg{width:38px;height:38px;display:block}
+@keyframes drop{0%,100%{height:36px}50%{height:112px}}
+@keyframes swing{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+.pumpkin{width:112px;height:auto;display:block;margin:0 auto 6px;animation:glow 3.4s ease-in-out infinite}
+.pumpkin .face{animation:flick 3s steps(1) infinite}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 14px rgba(255,138,31,.65))}50%{filter:drop-shadow(0 0 26px rgba(255,138,31,.95))}}
+@keyframes flick{0%,100%{opacity:1}22%{opacity:.82}24%{opacity:1}61%{opacity:.7}63%{opacity:1}}
+.hero h1{margin:0;font-family:'Creepster','Lora',serif;font-weight:400;letter-spacing:2px;line-height:1.1;
+  font-size:clamp(40px,9vw,70px);color:var(--orange);
+  text-shadow:0 0 12px rgba(255,138,31,.7),0 0 34px rgba(255,100,0,.45),2px 3px 0 #3a1258;
+  animation:titleFlick 6s infinite}
+@keyframes titleFlick{0%,90%,100%{opacity:1}92%{opacity:.7}94%{opacity:1}96%{opacity:.55}97%{opacity:1}}
+.hero p{margin:10px auto 0;max-width:520px;color:var(--muted);font-size:16px}
+
+.wrap{position:relative;z-index:2;max-width:860px;margin:0 auto;padding:6px 16px 90px}
+
+.box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:16px;
+  backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+.box h2{margin:0 0 10px;font-family:'Creepster','Lora',serif;font-weight:400;font-size:25px;letter-spacing:1px;color:var(--orange-soft)}
+.box ul{margin:0;padding-left:20px}
+.box li{margin-bottom:7px}
+.box li:last-child{margin-bottom:0}
+
+.name-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.name-box label{font-weight:700;color:var(--orange-soft)}
+.chip{font-size:14px;padding:2px 12px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:rgba(255,255,255,.04)}
+.name-box input{width:100%;padding:11px 13px;font-size:17px;color:var(--bone);background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.22);border-radius:10px}
+.name-box input:focus{outline:2px solid var(--orange);border-color:var(--orange)}
+.name-box .err{display:none;margin-top:8px;color:var(--no);font-weight:600;font-size:15px}
+.name-box.bad input{border-color:var(--no)}
+.name-box.bad .err{display:block}
+
+.player{position:sticky;top:8px;z-index:20;display:flex;align-items:center;gap:14px;padding:12px 16px;margin-bottom:20px;
+  background:rgba(20,10,34,.94);border:1px solid rgba(255,138,31,.5);border-radius:16px;
+  box-shadow:0 0 26px -6px rgba(255,138,31,.5),0 10px 30px -10px #000;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.play-btn{flex:none;display:flex;align-items:center;gap:9px;border:none;border-radius:999px;padding:11px 20px;cursor:pointer;
+  font-weight:700;font-size:15px;color:#1c0a00;background:linear-gradient(180deg,#ffb347,#ff8a1f);
+  box-shadow:0 0 18px -2px rgba(255,138,31,.8);transition:transform .12s,box-shadow .12s}
+.play-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 0 26px 0 rgba(255,138,31,.95)}
+.play-btn:active:not(:disabled){transform:translateY(1px)}
+.play-btn:disabled{cursor:not-allowed;background:#4a3f58;color:#9b8fa9;box-shadow:none}
+.play-btn:focus-visible{outline:3px solid #fff}
+.player-mid{flex:1;min-width:0}
+.track{position:relative;height:10px;border-radius:99px;background:rgba(255,255,255,.12);margin:12px 0 6px}
+.fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:99px;background:linear-gradient(90deg,#7b3fb8,#ff8a1f);transition:width .25s linear}
+.ghost{position:absolute;top:-13px;left:0;font-size:20px;transform:translateX(-50%);transition:left .25s linear;filter:drop-shadow(0 0 6px rgba(255,255,255,.7))}
+.pmeta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+.pmeta b{color:var(--orange-soft)}
+.pmsg{display:none;font-size:14px;margin-top:6px;color:var(--orange-soft);font-weight:600}
+.pmsg.show{display:block}
+.eq{flex:none;display:flex;align-items:flex-end;gap:3px;height:28px}
+.eq i{display:block;width:4px;height:6px;border-radius:2px;background:var(--orange)}
+.player.playing .eq i{animation:eq .7s ease-in-out infinite alternate}
+.eq i:nth-child(2){animation-delay:.15s!important}.eq i:nth-child(3){animation-delay:.3s!important}
+.eq i:nth-child(4){animation-delay:.08s!important}.eq i:nth-child(5){animation-delay:.22s!important}
+@keyframes eq{from{height:5px}to{height:26px}}
+.yt-hide{position:fixed;left:-9999px;top:0;width:200px;height:200px;overflow:hidden;pointer-events:none}
+
+.part{margin:34px 0 12px}
+.part h2{margin:0;font-family:'Creepster','Lora',serif;font-weight:400;font-size:32px;letter-spacing:1.5px;color:var(--orange);
+  text-shadow:0 0 14px rgba(255,138,31,.5)}
+.part p{margin:2px 0 0;color:var(--muted);font-style:italic}
+.part::after{content:"";display:block;height:3px;margin-top:10px;border-radius:3px;
+  background:linear-gradient(90deg,var(--orange),rgba(123,63,184,.6),transparent)}
+
+.q{position:relative;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 18px 16px;margin-bottom:12px;
+  transition:border-color .2s,box-shadow .2s}
+.q::after{content:"";position:absolute;right:0;bottom:0;width:58px;height:58px;pointer-events:none;opacity:.28;
+  background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60' fill='none' stroke='%23d9c9ee' stroke-width='1'><path d='M60 60 L0 60 M60 60 L0 36 M60 60 L6 6 M60 60 L36 0 M60 60 L60 0'/><path d='M60 44 Q44 44 44 60 M60 28 Q28 28 28 60 M60 12 Q12 12 12 60'/></svg>") no-repeat right bottom/contain}
+.q:hover{border-color:rgba(255,160,60,.6);box-shadow:0 0 22px -6px rgba(255,138,31,.5)}
+.q.ok{border-color:var(--ok)}
+.q.no{border-color:var(--no)}
+.q-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;min-height:30px}
+.qn{position:relative;display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:30px;padding:0 9px;
+  border-radius:50% 50% 46% 46%/58% 58% 42% 42%;font-weight:700;font-size:15px;color:#1c0a00;
+  background:radial-gradient(circle at 40% 30%,#ffc067,#ff8a1f 70%)}
+.qn::before{content:"";position:absolute;top:-5px;left:50%;width:5px;height:7px;margin-left:-2px;border-radius:2px;background:#5a9a30}
+.verdict{display:none;font-weight:700;font-size:14px;padding:2px 12px;border-radius:999px}
+.q.ok .verdict{display:inline-block;background:var(--ok);color:#0b2a12}
+.q.no .verdict{display:inline-block;background:var(--no);color:#2c0808}
+.q-text{margin-bottom:10px;font-size:17px}
+.opts{display:grid;gap:8px}
+.opts.tf{grid-template-columns:1fr 1fr}
+.opt{display:flex;align-items:flex-start;gap:10px;padding:10px 13px;border:1px solid rgba(255,255,255,.16);border-radius:10px;
+  background:rgba(255,255,255,.03);cursor:pointer;transition:border-color .12s,background .12s,box-shadow .12s}
+.opt:hover{border-color:var(--orange);background:rgba(255,138,31,.09)}
+.opt input{flex:none;margin-top:6px;width:16px;height:16px;accent-color:var(--orange)}
+.opt.picked{border-color:var(--orange);background:rgba(255,138,31,.17);box-shadow:0 0 14px -4px rgba(255,138,31,.7)}
+.opt.picked.good{border-color:var(--ok);background:var(--ok-bg);box-shadow:none}
+.opt.picked.bad{border-color:var(--no);background:var(--no-bg);box-shadow:none}
+.letter{color:var(--orange-soft);margin-right:2px}
+.gap{width:170px;max-width:100%;margin:0 4px;padding:2px 8px;font-size:17px;text-align:center;color:#fff;
+  background:rgba(255,255,255,.08);border:none;border-bottom:2px dashed var(--orange);border-radius:6px 6px 0 0}
+.gap:focus{outline:none;background:rgba(255,138,31,.16);border-bottom-style:solid}
+.gap.good{border-bottom:2px solid var(--ok);background:var(--ok-bg)}
+.gap.bad{border-bottom:2px solid var(--no);background:var(--no-bg)}
+
+.submit-row{text-align:center;margin:30px 0 14px}
+.btn{font-weight:700;font-size:16px;border-radius:999px;padding:12px 26px;cursor:pointer;border:1px solid var(--orange);
+  color:var(--orange-soft);background:transparent;transition:background .12s,transform .12s}
+.btn:hover:not(:disabled){background:rgba(255,138,31,.14)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn:focus-visible{outline:3px solid #fff}
+.btn.main{font-size:19px;padding:15px 44px;border:none;color:#1c0a00;background:linear-gradient(180deg,#ffb347,#ff8a1f);
+  box-shadow:0 0 24px -2px rgba(255,138,31,.8)}
+.btn.main:hover:not(:disabled){background:linear-gradient(180deg,#ffc067,#ff9a3c);transform:translateY(-1px)}
+
+.result{display:none;text-align:center;border-radius:16px;padding:22px 20px;margin-bottom:16px;
+  background:linear-gradient(160deg,rgba(60,24,96,.9),rgba(20,8,34,.95));border:1px solid var(--orange);
+  box-shadow:0 0 36px -8px rgba(255,138,31,.7)}
+.result.show{display:block;animation:pop .45s cubic-bezier(.2,1.3,.4,1)}
+@keyframes pop{from{transform:scale(.88);opacity:0}to{transform:scale(1);opacity:1}}
+.res-label{color:var(--muted)}
+.res-score{font-family:'Creepster','Lora',serif;font-size:64px;line-height:1.1;color:var(--orange);text-shadow:0 0 18px rgba(255,138,31,.6)}
+.res-score small{font-size:30px;color:var(--muted)}
+.res-msg{margin:6px 0 10px}
+.res-send{font-size:15px;color:var(--muted);margin-bottom:12px}
+.res-send.okk{color:var(--ok)}
+.res-send.fail{color:var(--no)}
+.res-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.dots::after{content:"";animation:dots 1.2s steps(4) infinite}
+@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%,100%{content:"..."}}
+
+.hist table{width:100%;border-collapse:collapse;font-size:15px}
+.hist th,.hist td{text-align:left;padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.12)}
+.hist th{color:var(--orange-soft);font-weight:600}
+.hist .empty{color:var(--muted);font-style:italic}
+.foot{text-align:center;color:var(--muted);margin-top:26px;font-size:15px}
+
+@media (max-width:620px){
+  .hero{padding-top:44px}
+  .moon{width:60px;height:60px;right:4%;top:14px}
+  .moon::before{width:13px;height:13px;top:14px;left:32px}
+  .moon::after{width:9px;height:9px;top:34px;left:15px}
+  .pumpkin{width:88px}
+  .player{flex-wrap:wrap;gap:10px;padding:10px 12px}
+  .eq{display:none}
+  .player-mid{flex-basis:100%;order:3}
+  .opts.tf{grid-template-columns:1fr}
+  .res-score{font-size:52px}
+  .q{padding:12px 14px 14px}
+  .q-text{font-size:16px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<canvas id="embers"></canvas>
+<div class="fog"></div>
+<div class="fog f2"></div>
+<svg class="grave" viewBox="0 0 1200 120" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+  <path d="M0 120 V82 Q150 56 300 80 T600 76 T900 82 T1200 72 V120 Z" fill="#04010a"/>
+  <g fill="#04010a">
+    <path d="M140 82 v-30 a14 14 0 0 1 28 0 v30 z"/>
+    <path d="M390 78 v-24 a12 12 0 0 1 24 0 v24 z"/>
+    <path d="M700 78 v-34 a15 15 0 0 1 30 0 v34 z"/>
+    <path d="M985 82 v-26 a13 13 0 0 1 26 0 v26 z"/>
+    <path d="M1112 76 h-4 v-30 h-12 v-8 h12 v-10 h8 v10 h12 v8 h-12 v30 z"/>
+  </g>
+  <path d="M250 82 L252 42 L240 24 M252 42 L266 30 M252 58 L238 48 M246 32 L242 14" stroke="#04010a" stroke-width="3" fill="none" stroke-linecap="round"/>
+</svg>
+<div class="flash" id="flash"></div>
+<div class="yt-hide" aria-hidden="true"><div id="ytHolder"></div></div>
+
+<header class="hero">
+  <div class="moon"></div>
+  <div class="spider" aria-hidden="true">
+    <div class="thread"></div>
+    <svg viewBox="0 0 40 40">
+      <g stroke="#9b7bd0" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 20 L7 11 L3 19"/><path d="M20 22 L5 22 L2 30"/><path d="M20 25 L7 32 L5 39"/><path d="M20 27 L13 37 L12 40"/>
+        <path d="M20 20 L33 11 L37 19"/><path d="M20 22 L35 22 L38 30"/><path d="M20 25 L33 32 L35 39"/><path d="M20 27 L27 37 L28 40"/>
+      </g>
+      <ellipse cx="20" cy="25" rx="8" ry="9" fill="#120a1c" stroke="#9b7bd0" stroke-width="1.2"/>
+      <circle cx="20" cy="15" r="5" fill="#120a1c" stroke="#9b7bd0" stroke-width="1.2"/>
+      <circle cx="18" cy="14" r="1.3" fill="#ff4040"/><circle cx="22" cy="14" r="1.3" fill="#ff4040"/>
+    </svg>
+  </div>
+  <svg class="pumpkin" viewBox="0 0 120 110" aria-hidden="true">
+    <path d="M60 17 C58 9 62 4 71 3" stroke="#4c8a2b" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <ellipse cx="34" cy="63" rx="26" ry="38" fill="#e8700a"/>
+    <ellipse cx="86" cy="63" rx="26" ry="38" fill="#e8700a"/>
+    <ellipse cx="60" cy="63" rx="30" ry="40" fill="#ff8a1f"/>
+    <path d="M60 24 C53 42 53 84 60 102" stroke="#c75a00" stroke-width="2.5" fill="none" opacity=".6"/>
+    <g class="face" fill="#fff0a0">
+      <path d="M34 54 L52 54 L43 38 Z"/>
+      <path d="M68 54 L86 54 L77 38 Z"/>
+      <path d="M60 62 L54 73 L66 73 Z"/>
+      <path d="M32 78 L41 88 L50 79 L60 89 L70 79 L79 88 L88 78 L83 95 Q60 106 37 95 Z"/>
+    </g>
+  </svg>
+  <h1>Halloween Listening Test</h1>
+  <p>Bài nghe luyện tập trình độ B1+ / B2, gồm 30 câu hỏi</p>
+</header>
+
+<main class="wrap">
+
+  <section class="box">
+    <h2>Trước khi vào bài</h2>
+    <ul>
+      <li>Bài nghe chỉ phát tối đa 2 lượt. Các em được tạm dừng nhưng không tua được, nên hãy nghe thật tập trung.</li>
+      <li>Ghi họ tên vào khung bên dưới trước khi bấm nghe và trước khi nộp bài.</li>
+      <li>Nộp bài xong, kết quả được gửi thẳng cho giáo viên. Hệ thống chỉ báo câu nào đúng, câu nào sai và không hiện đáp án.</li>
+      <li>Các em được làm lại bao nhiêu lần cũng được, mỗi lần nộp tính là một lần làm bài. Lượt nghe thì không được cấp thêm.</li>
+    </ul>
+  </section>
+
+  <section class="box name-box" id="nameBox">
+    <div class="name-row">
+      <label for="studentName">Họ và tên</label>
+      <span class="chip" id="attemptChip">Chưa nộp lần nào</span>
+    </div>
+    <input type="text" id="studentName" placeholder="Nhập họ tên đầy đủ" autocomplete="off" spellcheck="false">
+    <div class="err" id="nameErr">Nhớ ghi họ tên trước khi nghe và nộp bài nhé.</div>
+  </section>
+
+  <section class="player" id="player" aria-label="Trình phát bài nghe">
+    <button type="button" class="play-btn" id="playBtn"><span id="playIco">▶</span><span id="playLbl">Bắt đầu nghe</span></button>
+    <div class="player-mid">
+      <div class="track"><div class="fill" id="fill"></div><span class="ghost" id="ghost">👻</span></div>
+      <div class="pmeta"><span id="timeLbl">0:00 / 0:00</span><span id="listenLbl">Còn <b>2</b> lượt nghe</span><span id="answeredLbl">Đã làm 0/30</span></div>
+      <div class="pmsg" id="pmsg"></div>
+    </div>
+    <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+  </section>
+
+  <div id="quiz"></div>
+
+  <div class="submit-row"><button type="button" class="btn main" id="submitBtn">Nộp bài</button></div>
+
+  <section class="result" id="result" aria-live="polite">
+    <div class="res-label" id="resLabel"></div>
+    <div class="res-score"><span id="resNum">0</span> <small>/ 30</small></div>
+    <div class="res-msg" id="resMsg"></div>
+    <div class="res-send" id="sendStatus"></div>
+    <div class="res-actions">
+      <button type="button" class="btn" id="jumpBtn">Đến câu sai đầu tiên</button>
+      <button type="button" class="btn" id="resendBtn" hidden>Gửi lại bài</button>
+      <button type="button" class="btn" id="retryBtn">Làm lại từ đầu</button>
+    </div>
+  </section>
+
+  <section class="box hist">
+    <h2>Lịch sử làm bài</h2>
+    <div id="histBody"></div>
+  </section>
+
+  <div class="foot">Chúc các em làm bài thật tốt.</div>
+</main>
+
+<script>
+(function(){
+"use strict";
+
+/* ===================== CẤU HÌNH ===================== */
+var VIDEO_ID = "UyOqOa440l4";
+var TEACHER_EMAIL = "your-email@gmail.com";   // đổi thành Gmail nhận bài
+var MAX_LISTENS = 2;
+var STORE_PREFIX = "halloweenListening_v1_";
+var LETTERS = ["A","B","C","D"];
+
+/* ===================== DỮ LIỆU ===================== */
+var QUESTIONS = [
+  {n:1,type:"mc",q:"According to the speaker, what do millions of people do every year on Halloween?",o:["Attend historical lectures","Spill into streets dressed in various costumes","Travel abroad with their families","Stay home to avoid mischievous spirits"],a:1},
+  {n:2,type:"mc",q:"The word \"hallow\" historically means:",o:["evil spirit","dark night","holy person","autumn harvest"],a:2},
+  {n:3,type:"mc",q:"The suffix \"-een\" comes from a contraction of which word?",o:["End","Eve","Earth","Event"],a:1},
+  {n:4,type:"mc",q:"The original root of All Hallows' Eve traces back to which ancient Celtic festival?",o:["Samhain","Beltane","Yule","Saturnalia"],a:0},
+  {n:5,type:"mc",q:"The ancient Celtic festival of Samhain primarily celebrated:",o:["the crowning of a new king","military victories","death and rebirth","the arrival of summer"],a:2},
+  {n:6,type:"mc",q:"How did the ancient Celts divide their calendar year?",o:["Into four equal seasons","Into twelve lunar cycles","Into two halves: the light and the dark","Into three farming periods"],a:2},
+  {n:7,type:"mc",q:"In modern Irish, the word \"Samhain\" translates to:",o:["holy fire","summer's end","winter's cold","night of spirits"],a:1},
+  {n:8,type:"mc",q:"The celebratory feast during Samhain was held to:",o:["honor loved ones who had recently died","welcome travelers from neighboring tribes","feed soldiers returning from wars","celebrate the birth of children"],a:0},
+  {n:9,type:"mc",q:"Ancient Celts wore costumes, mostly animal furs, in order to:",o:["display their hunting skills","stay warm during rituals","perform folk dances","hide from unfriendly spirits"],a:3},
+  {n:10,type:"mc",q:"What were the original lanterns hollowed out from before pumpkins were used?",o:["Watermelons","Gourds","Turnips","Apples"],a:1},
+
+  {n:11,type:"gap",q:"Celts made sacrifices of crops or ___ as an offering to spirits.",a:["animals"]},
+  {n:12,type:"gap",q:"In ancient times, pranks played by humans were often blamed on ___ spirits.",a:["mischievous"]},
+  {n:13,type:"gap",q:"Most Celtic territory was conquered by Rome in ___ CE.",a:["43","43 ce"]},
+  {n:14,type:"gap",q:"The spread of Christianity and ___ forced Celtic rituals to transform or be repressed.",a:["catholicism"]},
+  {n:15,type:"gap",q:"Samhain later transformed into All Saints' Day, which was also called All ___ Day.",a:["hallows"]},
+  {n:16,type:"gap",q:"All Saints' Day was intended as an occasion to honor Christian saints and ___.",a:["martyrs"]},
+  {n:17,type:"gap",q:"Instead of sacrifices, people began making food offerings to the ___.",a:["poor"]},
+  {n:18,type:"gap",q:"Halloween gradually developed into a more ___ version of All Hallows' Eve.",a:["secular"]},
+  {n:19,type:"gap",q:"The Protestant Puritans who colonized America avoided Catholic holidays because they believed such days encouraged ___.",a:["idolatry"]},
+  {n:20,type:"gap",q:"Early American colonies banned Halloween because it was considered too ___ or too Catholic.",a:["pagan"]},
+
+  {n:21,type:"tf",q:"In the 1800s, some Halloween customs began merging into secular harvest-related celebrations.",a:true},
+  {n:22,type:"tf",q:"A massive arrival of Irish immigrants occurred in the mid-19th century because of the potato famine.",a:true},
+  {n:23,type:"tf",q:"In the late 19th century, children received money or fruit only if they recited church prayers.",a:false},
+  {n:24,type:"tf",q:"Trick-or-treating was introduced by adults as a way to persuade children to stop playing pranks.",a:true},
+  {n:25,type:"tf",q:"Factory-made costumes for children and adults first became popular during the 1920s and 1930s.",a:true},
+  {n:26,type:"tf",q:"Candy makers joined the Halloween trend during the economic boom of the 1950s after World War II.",a:true},
+  {n:27,type:"tf",q:"Television networks started broadcasting Halloween specials before cinemas held horror movie festivals.",a:false},
+  {n:28,type:"tf",q:"In 2015, the National Retail Federation estimated Halloween retail spending could reach $6.9 billion.",a:true},
+  {n:29,type:"tf",q:"Modern pop-up costume stores are typically open for only two to three days before Halloween.",a:false},
+  {n:30,type:"tf",q:"The narrator concludes that Halloween is losing public interest and will soon disappear.",a:false}
+];
+var TOTAL = QUESTIONS.length;
+
+var PARTS = [
+  {from:1,title:"Part 1: Multiple Choice",sub:"Questions 1 to 10. Choose the correct letter A, B, C or D."},
+  {from:11,title:"Part 2: Sentence Completion",sub:"Questions 11 to 20. Write NO MORE THAN TWO WORDS AND/OR A NUMBER from the recording for each answer."},
+  {from:21,title:"Part 3: True or False",sub:"Questions 21 to 30. Decide whether each statement is True or False according to the recording."}
+];
+
+/* ===================== TIỆN ÍCH ===================== */
+function $(id){ return document.getElementById(id); }
+function el(tag, cls, html){
+  var e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(html !== undefined) e.innerHTML = html;
+  return e;
+}
+function norm(s){
+  return (s || "").normalize("NFC").toLowerCase()
+    .replace(/[\u2018\u2019`\u00b4]/g, "'")
+    .replace(/[.,!?;:'"]/g, "")
+    .replace(/\s+/g, " ").trim();
+}
+function fmt(t){
+  t = Math.max(0, Math.floor(t || 0));
+  return Math.floor(t / 60) + ":" + (t % 60 < 10 ? "0" : "") + (t % 60);
+}
+var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ===================== LƯU TRỮ THEO TÊN ===================== */
+var memState = {};
+function getName(){ return $("studentName").value.trim().replace(/\s+/g, " "); }
+function keyFor(name){ return STORE_PREFIX + name.normalize("NFC").toLowerCase(); }
+function loadState(name){
+  var base = {listens:0, attempts:[]};
+  if(!name) return base;
+  var k = keyFor(name);
+  try{
+    var raw = localStorage.getItem(k);
+    if(raw){
+      var o = JSON.parse(raw);
+      return {listens: +o.listens || 0, attempts: Array.isArray(o.attempts) ? o.attempts : []};
+    }
+  }catch(e){}
+  return memState[k] || base;
+}
+function saveState(name, st){
+  var k = keyFor(name);
+  memState[k] = st;
+  try{ localStorage.setItem(k, JSON.stringify(st)); }catch(e){}
+}
+
+/* ===================== DỰNG CÂU HỎI ===================== */
+var quizEl = $("quiz");
+function buildQuiz(){
+  QUESTIONS.forEach(function(q){
+    PARTS.forEach(function(p){
+      if(p.from === q.n){
+        var h = el("div", "part", "<h2>" + p.title + "</h2><p>" + p.sub + "</p>");
+        quizEl.appendChild(h);
+      }
+    });
+    var card = el("div", "q");
+    card.id = "q" + q.n;
+    var body = "";
+    if(q.type === "mc"){
+      body = '<div class="q-text">' + q.q + '</div><div class="opts">' +
+        q.o.map(function(t, i){
+          return '<label class="opt"><input type="radio" name="q' + q.n + '" value="' + i + '"><span><b class="letter">' + LETTERS[i] + '.</b> ' + t + '</span></label>';
+        }).join("") + '</div>';
+    } else if(q.type === "tf"){
+      body = '<div class="q-text">' + q.q + '</div><div class="opts tf">' +
+        '<label class="opt"><input type="radio" name="q' + q.n + '" value="true"><span>True</span></label>' +
+        '<label class="opt"><input type="radio" name="q' + q.n + '" value="false"><span>False</span></label></div>';
+    } else {
+      var inp = '<input type="text" class="gap" name="q' + q.n + '" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" aria-label="Câu ' + q.n + '">';
+      body = '<div class="q-text">' + q.q.replace("___", inp) + '</div>';
+    }
+    card.innerHTML = '<div class="q-top"><span class="qn">' + q.n + '</span><span class="verdict"></span></div>' + body;
+    quizEl.appendChild(card);
+  });
+}
+buildQuiz();
+
+function clearMark(card){
+  card.classList.remove("ok", "no");
+  card.querySelector(".verdict").textContent = "";
+  var g = card.querySelector(".gap");
+  if(g) g.classList.remove("good", "bad");
+  card.querySelectorAll(".opt").forEach(function(o){ o.classList.remove("good", "bad"); });
+}
+function onAnswerChange(e){
+  var card = e.target.closest(".q");
+  if(!card) return;
+  clearMark(card);
+  if(e.target.type === "radio"){
+    card.querySelectorAll(".opt").forEach(function(o){
+      o.classList.toggle("picked", o.querySelector("input").checked);
+    });
+  }
+  updateAnswered();
+}
+quizEl.addEventListener("input", onAnswerChange);
+quizEl.addEventListener("change", onAnswerChange);
+
+/* ===================== ĐỌC VÀ CHẤM ===================== */
+function readAnswer(q){
+  if(q.type === "gap") return document.querySelector("#q" + q.n + " .gap").value.trim();
+  var c = document.querySelector('input[name="q' + q.n + '"]:checked');
+  return c ? c.value : null;
+}
+function isCorrect(q, a){
+  if(a === null || a === "") return false;
+  if(q.type === "mc") return +a === q.a;
+  if(q.type === "tf") return (a === "true") === q.a;
+  var v = norm(a), vs = v.replace(/\s/g, "");
+  return q.a.some(function(x){ var nx = norm(x); return nx === v || nx.replace(/\s/g, "") === vs; });
+}
+function showAnswer(q, a){
+  if(a === null || a === "") return "(bỏ trống)";
+  if(q.type === "mc") return LETTERS[+a] + ". " + q.o[+a];
+  if(q.type === "tf") return a === "true" ? "True" : "False";
+  return a;
+}
+function mark(q, ok, answered){
+  var card = $("q" + q.n);
+  card.classList.remove("ok", "no");
+  card.classList.add(ok ? "ok" : "no");
+  card.querySelector(".verdict").textContent = ok ? "Đúng" : (answered ? "Chưa đúng" : "Chưa trả lời");
+  if(q.type === "gap"){
+    var g = card.querySelector(".gap");
+    g.classList.remove("good", "bad");
+    g.classList.add(ok ? "good" : "bad");
+  } else {
+    card.querySelectorAll(".opt").forEach(function(o){
+      o.classList.remove("good", "bad");
+      if(o.querySelector("input").checked) o.classList.add(ok ? "good" : "bad");
+    });
+  }
+}
+function updateAnswered(){
+  var n = 0;
+  QUESTIONS.forEach(function(q){ var a = readAnswer(q); if(a !== null && a !== "") n++; });
+  $("answeredLbl").textContent = "Đã làm " + n + "/" + TOTAL;
+}
+
+/* ===================== TÊN, LỊCH SỬ ===================== */
+function flagName(){
+  $("nameBox").classList.add("bad");
+  $("studentName").focus();
+  $("nameBox").scrollIntoView({behavior: reduceMotion ? "auto" : "smooth", block: "center"});
+}
+function renderHistory(){
+  var name = getName();
+  var body = $("histBody");
+  if(!name){
+    body.innerHTML = '<div class="empty">Ghi họ tên rồi nộp bài, lịch sử các lần làm sẽ hiện ở đây.</div>';
+    $("attemptChip").textContent = "Chưa nộp lần nào";
+    return;
+  }
+  var st = loadState(name);
+  $("attemptChip").textContent = st.attempts.length ? ("Đã nộp " + st.attempts.length + " lần") : "Chưa nộp lần nào";
+  if(!st.attempts.length){
+    body.innerHTML = '<div class="empty">Chưa có lần nộp nào.</div>';
+    return;
+  }
+  var h = '<table><tr><th>Lần</th><th>Số câu đúng</th><th>Thời gian nộp</th></tr>';
+  st.attempts.forEach(function(a){
+    h += '<tr><td>Lần ' + a.n + '</td><td>' + a.score + ' / ' + a.total + '</td><td>' + a.time + '</td></tr>';
+  });
+  body.innerHTML = h + '</table>';
+}
+var nameTimer = null;
+$("studentName").addEventListener("input", function(){
+  $("nameBox").classList.remove("bad");
+  clearTimeout(nameTimer);
+  nameTimer = setTimeout(function(){ renderHistory(); refreshPlayerUI(); }, 250);
+});
+
+/* ===================== TRÌNH PHÁT (YOUTUBE, CHỈ NGHE) ===================== */
+var yt = null, ytReady = false, ytFailed = false;
+var session = {active:false, heard:false, lastTime:0, lastWall:0, name:""};
+var pollTimer = null, duration = 0;
+
+function setPMsg(t){
+  var m = $("pmsg");
+  m.textContent = t || "";
+  m.classList.toggle("show", !!t);
+}
+function setProgress(){
+  var pct = duration > 0 ? Math.min(100, (session.lastTime / duration) * 100) : 0;
+  $("fill").style.width = pct + "%";
+  $("ghost").style.left = pct + "%";
+  $("timeLbl").textContent = fmt(session.lastTime) + " / " + fmt(duration);
+}
+function isPlayingNow(){
+  if(!yt || !ytReady) return false;
+  try{
+    var s = yt.getPlayerState();
+    return s === YT.PlayerState.PLAYING || s === YT.PlayerState.BUFFERING;
+  }catch(e){ return false; }
+}
+function refreshPlayerUI(){
+  var btn = $("playBtn"), ico = $("playIco"), lbl = $("playLbl");
+  var name = getName();
+  var used = name ? loadState(name).listens : 0;
+  var remaining = Math.max(0, MAX_LISTENS - used);
+  $("listenLbl").innerHTML = "Còn <b>" + remaining + "</b> lượt nghe";
+  var playing = session.active && isPlayingNow();
+  $("player").classList.toggle("playing", playing);
+  if(session.active){
+    btn.disabled = false;
+    ico.textContent = playing ? "⏸" : "▶";
+    lbl.textContent = playing ? "Tạm dừng" : "Tiếp tục";
+  } else if(remaining <= 0){
+    btn.disabled = true;
+    ico.textContent = "✕";
+    lbl.textContent = "Đã hết lượt nghe";
+  } else {
+    btn.disabled = false;
+    ico.textContent = "▶";
+    lbl.textContent = used === 0 ? "Bắt đầu nghe" : "Nghe lại";
+  }
+}
+function startPoll(){
+  if(pollTimer) return;
+  pollTimer = setInterval(tick, 250);
+}
+function stopPoll(){
+  clearInterval(pollTimer);
+  pollTimer = null;
+}
+function tick(){
+  if(!session.active || !yt || !ytReady) return;
+  var t = 0, state = -1;
+  try{
+    t = yt.getCurrentTime();
+    state = yt.getPlayerState();
+    var d = yt.getDuration();
+    if(d > 0) duration = d;
+  }catch(e){ return; }
+  var now = performance.now();
+  var playing = state === YT.PlayerState.PLAYING;
+  var expected = session.lastTime + (playing ? (now - session.lastWall) / 1000 : 0);
+  if(t > expected + 1.2 || t < session.lastTime - 1.2){
+    try{ yt.seekTo(session.lastTime, true); }catch(e){}
+  } else {
+    session.lastTime = t;
+  }
+  session.lastWall = now;
+  setProgress();
+}
+function onPlayClick(){
+  if(!ytReady){
+    setPMsg(ytFailed ? "Không tải được trình phát. Hãy kiểm tra mạng rồi tải lại trang." : "Trình phát đang tải, chờ một chút nhé.");
+    return;
+  }
+  setPMsg("");
+  if(session.active){
+    if(isPlayingNow()) yt.pauseVideo(); else yt.playVideo();
+    return;
+  }
+  var name = getName();
+  if(!name){ flagName(); return; }
+  var st = loadState(name);
+  if(st.listens >= MAX_LISTENS){ refreshPlayerUI(); return; }
+  st.listens++;
+  saveState(name, st);
+  session = {active:true, heard:false, lastTime:0, lastWall:performance.now(), name:name};
+  try{ yt.seekTo(0, true); }catch(e){}
+  yt.playVideo();
+  refreshPlayerUI();
+}
+function onYtState(e){
+  var S = YT.PlayerState;
+  if(e.data === S.PLAYING){
+    if(session.active){
+      session.heard = true;
+      session.lastWall = performance.now();
+      startPoll();
+    } else {
+      try{ yt.pauseVideo(); }catch(x){}
+    }
+  } else if(e.data === S.PAUSED){
+    if(session.active) session.lastWall = performance.now();
+  } else if(e.data === S.ENDED){
+    if(session.active){
+      session.active = false;
+      stopPoll();
+      session.lastTime = duration;
+      setProgress();
+    }
+  }
+  refreshPlayerUI();
+}
+function onYtError(){
+  if(session.active && !session.heard){
+    var st = loadState(session.name);
+    st.listens = Math.max(0, st.listens - 1);
+    saveState(session.name, st);
+    session.active = false;
+    stopPoll();
+  }
+  setPMsg("Video chưa phát được. Hãy tải lại trang, nếu vẫn lỗi thì báo giáo viên nhé.");
+  refreshPlayerUI();
+}
+window.onYouTubeIframeAPIReady = function(){
+  var vars = {controls:0, disablekb:1, fs:0, rel:0, modestbranding:1, playsinline:1, iv_load_policy:3, enablejsapi:1};
+  if(/^https?:$/.test(location.protocol)) vars.origin = location.origin;
+  yt = new YT.Player("ytHolder", {
+    width:"200", height:"200", videoId:VIDEO_ID,
+    host:"https://www.youtube-nocookie.com",
+    playerVars:vars,
+    events:{
+      onReady:function(){
+        ytReady = true;
+        try{ var d = yt.getDuration(); if(d > 0) duration = d; }catch(e){}
+        setProgress();
+        refreshPlayerUI();
+      },
+      onStateChange:onYtState,
+      onError:onYtError
+    }
+  });
+};
+(function loadYT(){
+  var s = document.createElement("script");
+  s.src = "https://www.youtube.com/iframe_api";
+  s.onerror = function(){ ytFailed = true; };
+  document.head.appendChild(s);
+  setTimeout(function(){ if(!ytReady) ytFailed = true; }, 12000);
+})();
+$("playBtn").addEventListener("click", onPlayClick);
+setInterval(function(){ if(session.active) refreshPlayerUI(); }, 500);
+
+/* ===================== NỘP BÀI VÀ GỬI CHO GIÁO VIÊN ===================== */
+var lastPayload = null, sending = false;
+
+function sendPayload(payload){
+  return fetch("https://formsubmit.co/ajax/" + TEACHER_EMAIL, {
+    method:"POST",
+    headers:{"Content-Type":"application/json", "Accept":"application/json"},
+    body:JSON.stringify(payload)
+  }).then(function(res){
+    if(!res.ok) throw new Error("http " + res.status);
+    return res.json().catch(function(){ return {}; });
+  }).then(function(data){
+    if(data && (data.success === false || data.success === "false")) throw new Error(data.message || "fail");
+    return true;
+  });
+}
+function doSend(attemptNo){
+  var status = $("sendStatus");
+  sending = true;
+  $("submitBtn").disabled = true;
+  $("resendBtn").hidden = true;
+  status.className = "res-send";
+  status.innerHTML = '<span class="dots">Đang gửi bài cho giáo viên</span>';
+  sendPayload(lastPayload).then(function(){
+    status.className = "res-send okk";
+    status.textContent = "Bài làm lần " + attemptNo + " đã được gửi cho giáo viên.";
+  }).catch(function(){
+    status.className = "res-send fail";
+    status.textContent = "Chưa gửi được bài. Kiểm tra mạng rồi bấm Gửi lại bài.";
+    $("resendBtn").hidden = false;
+  }).then(function(){
+    sending = false;
+    $("submitBtn").disabled = false;
+  });
+}
+function messageFor(score){
+  if(score === TOTAL) return "Trọn điểm rồi, rất xuất sắc.";
+  if(score >= 27) return "Gần như hoàn hảo, chỉ còn vài câu nữa thôi.";
+  if(score >= 21) return "Khá tốt rồi. Xem lại các câu đỏ và thử sửa nhé.";
+  if(score >= 15) return "Em đã làm được hơn một nửa. Xem lại các câu đỏ và thử sửa nhé.";
+  return "Chưa được như ý, nhưng em có thể làm lại. Cứ bình tĩnh xem lại các câu đỏ.";
+}
+function celebrate(score){
+  if(reduceMotion) return;
+  var icons = ["🎃","👻","🦇","🍬","🕷️","🍭"];
+  var n = score === TOTAL ? 46 : 28;
+  for(var i = 0; i < n; i++){
+    (function(i){
+      setTimeout(function(){
+        var f = el("span", "fall", icons[Math.floor(Math.random() * icons.length)]);
+        f.style.left = (Math.random() * 100) + "vw";
+        f.style.setProperty("--dx", (Math.random() * 160 - 80) + "px");
+        f.style.setProperty("--rot", (Math.random() * 720 - 360) + "deg");
+        f.style.animationDuration = (3 + Math.random() * 2.5) + "s";
+        f.style.fontSize = (20 + Math.random() * 18) + "px";
+        document.body.appendChild(f);
+        f.addEventListener("animationend", function(){ f.remove(); });
+      }, i * 70);
+    })(i);
+  }
+}
+function submitQuiz(){
+  if(sending) return;
+  var name = getName();
+  if(!name){ flagName(); return; }
+  var st = loadState(name);
+  var attemptNo = st.attempts.length + 1;
+  var score = 0, rows = {}, firstWrong = null;
+
+  QUESTIONS.forEach(function(q){
+    var a = readAnswer(q);
+    var answered = !(a === null || a === "");
+    var ok = isCorrect(q, a);
+    if(ok) score++;
+    mark(q, ok, answered);
+    var key = "Cau_" + (q.n < 10 ? "0" : "") + q.n;
+    rows[key] = showAnswer(q, a) + "  =>  " + (ok ? "Đúng" : "Sai");
+  });
+
+  var when = new Date().toLocaleString("vi-VN");
+  st.attempts.push({n:attemptNo, score:score, total:TOTAL, time:when});
+  saveState(name, st);
+  renderHistory();
+
+  $("resLabel").textContent = "Lần làm thứ " + attemptNo;
+  $("resNum").textContent = score;
+  $("resMsg").textContent = messageFor(score);
+  $("jumpBtn").hidden = score === TOTAL;
+  $("result").classList.add("show");
+
+  var payload = {
+    _subject: "Halloween Listening | " + name + " | Lần " + attemptNo + " | " + score + "/" + TOTAL,
+    _template: "table",
+    _captcha: "false",
+    Ho_ten: name,
+    Lan_lam: attemptNo,
+    Diem: score + " / " + TOTAL,
+    Luot_nghe_da_dung: Math.min(st.listens, MAX_LISTENS) + " / " + MAX_LISTENS,
+    Thoi_gian_nop: when
+  };
+  Object.keys(rows).forEach(function(k){ payload[k] = rows[k]; });
+  lastPayload = payload;
+
+  $("result").scrollIntoView({behavior: reduceMotion ? "auto" : "smooth", block:"center"});
+  if(score >= 24) celebrate(score);
+  doSend(attemptNo);
+}
+$("submitBtn").addEventListener("click", submitQuiz);
+$("resendBtn").addEventListener("click", function(){
+  if(lastPayload && !sending) doSend(lastPayload.Lan_lam);
+});
+$("jumpBtn").addEventListener("click", function(){
+  var w = document.querySelector(".q.no");
+  if(w) w.scrollIntoView({behavior: reduceMotion ? "auto" : "smooth", block:"center"});
+});
+$("retryBtn").addEventListener("click", function(){
+  if(!window.confirm("Xóa toàn bộ câu trả lời để làm lại? Lượt nghe sẽ không được cấp thêm.")) return;
+  QUESTIONS.forEach(function(q){
+    var card = $("q" + q.n);
+    clearMark(card);
+    card.querySelectorAll("input").forEach(function(i){
+      if(i.type === "radio") i.checked = false; else i.value = "";
+    });
+    card.querySelectorAll(".opt").forEach(function(o){ o.classList.remove("picked"); });
+  });
+  $("result").classList.remove("show");
+  updateAnswered();
+  window.scrollTo({top: 0, behavior: reduceMotion ? "auto" : "smooth"});
+});
+
+/* ===================== HIỆU ỨNG HALLOWEEN ===================== */
+var BAT_SVG = '<svg viewBox="0 0 64 32"><path d="M32 10C30 4 28 3 26 5C24 8 18 6 10 2C12 8 8 14 0 16C8 16 12 18 14 24C18 20 22 20 26 24C28 20 30 18 32 20C34 18 36 20 38 24C42 20 46 20 50 24C52 18 56 16 64 16C56 14 52 8 54 2C46 6 40 8 38 5C36 3 34 4 32 10Z"/></svg>';
+
+if(!reduceMotion){
+  /* đốm lửa bay */
+  (function(){
+    var c = $("embers"), ctx = c.getContext("2d"), W = 0, H = 0, ps = [];
+    function resize(){ W = c.width = window.innerWidth; H = c.height = window.innerHeight; }
+    function mk(init){
+      return {x:Math.random() * W, y:init ? Math.random() * H : H + 10, r:.8 + Math.random() * 2,
+        vy:.2 + Math.random() * .5, ph:Math.random() * 6.28, a:.25 + Math.random() * .5,
+        col:Math.random() < .75 ? "255,138,31" : "190,140,255"};
+    }
+    resize();
+    window.addEventListener("resize", resize);
+    var N = window.innerWidth < 600 ? 26 : 48;
+    for(var i = 0; i < N; i++) ps.push(mk(true));
+    function frame(){
+      if(!document.hidden){
+        ctx.clearRect(0, 0, W, H);
+        ps.forEach(function(p){
+          p.y -= p.vy; p.ph += .02; p.x += Math.sin(p.ph) * .4;
+          if(p.y < -10){ var n = mk(false); p.x = n.x; p.y = n.y; p.r = n.r; p.vy = n.vy; p.a = n.a; p.col = n.col; }
+          var fl = .6 + .4 * Math.sin(p.ph * 3);
+          ctx.fillStyle = "rgba(" + p.col + "," + (p.a * fl * .25) + ")";
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 4, 0, 6.28); ctx.fill();
+          ctx.fillStyle = "rgba(" + p.col + "," + (p.a * fl) + ")";
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.28); ctx.fill();
+        });
+      }
+      requestAnimationFrame(frame);
+    }
+    frame();
+  })();
+
+  /* dơi bay ngang màn hình */
+  (function batLoop(){
+    if(!document.hidden){
+      var b = el("div", "bat" + (Math.random() < .5 ? " rtl" : ""));
+      b.style.width = (28 + Math.random() * 34) + "px";
+      b.style.top = (6 + Math.random() * 62) + "vh";
+      b.style.animationDuration = (8 + Math.random() * 7) + "s";
+      b.innerHTML = '<div class="bat-in">' + BAT_SVG + '</div>';
+      document.body.appendChild(b);
+      b.addEventListener("animationend", function(){ b.remove(); });
+    }
+    setTimeout(batLoop, 5000 + Math.random() * 7000);
+  })();
+
+  /* cặp mắt lấp ló ở rìa màn hình */
+  (function eyesLoop(){
+    if(!document.hidden){
+      var e = el("div", "eyes", "<i></i><i></i>");
+      e.style.left = (Math.random() < .5 ? (1 + Math.random() * 6) : (88 + Math.random() * 6)) + "%";
+      e.style.top = (14 + Math.random() * 70) + "vh";
+      document.body.appendChild(e);
+      setTimeout(function(){ e.remove(); }, 3400);
+    }
+    setTimeout(eyesLoop, 9000 + Math.random() * 8000);
+  })();
+
+  /* chớp sáng nhẹ */
+  (function flashLoop(){
+    setTimeout(function(){
+      if(!document.hidden){
+        var f = $("flash");
+        f.classList.remove("go");
+        void f.offsetWidth;
+        f.classList.add("go");
+      }
+      flashLoop();
+    }, 45000 + Math.random() * 40000);
+  })();
+}
+
+/* ===================== KHỞI TẠO ===================== */
+renderHistory();
+refreshPlayerUI();
+updateAnswered();
+setProgress();
+})();
+</script>
+</body>
+</html>
